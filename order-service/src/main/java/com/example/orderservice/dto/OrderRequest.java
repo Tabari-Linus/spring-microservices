@@ -1,6 +1,6 @@
 package com.example.orderservice.dto;
 
-import com.example.orderservice.OrderStatus;
+import com.example.orderservice.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

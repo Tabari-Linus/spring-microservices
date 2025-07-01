@@ -1,6 +1,6 @@
 package com.example.orderservice.service.impl;
 
-import com.example.orderservice.OrderStatus;
+import com.example.orderservice.enums.OrderStatus;
 import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.dto.ProductDto;
 import com.example.orderservice.exception.OrderNotFoundException;
@@ -24,12 +24,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
 
-    @Value("${product.service.url}")
-    private String productServiceUrl;
 
     @Override
     public void createOrder(Order order) {
-        String productUrl = productServiceUrl + "/" + order.getProductId();
+        String productUrl = "http://product-service/api/v1/products/"+ order.getProductId();
         ProductDto productDto;
         try {
             productDto = restTemplate.getForObject(productUrl, ProductDto.class);

@@ -1,6 +1,6 @@
 package com.example.orderservice.model;
 
-import com.example.orderservice.OrderStatus;
+import com.example.orderservice.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
