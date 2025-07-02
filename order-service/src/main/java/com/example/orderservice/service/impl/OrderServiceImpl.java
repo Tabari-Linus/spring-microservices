@@ -1,5 +1,6 @@
 package com.example.orderservice.service.impl;
 
+import com.example.event.OrderCreatedEvent;
 import com.example.orderservice.enums.OrderStatus;
 import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.dto.ProductDto;
@@ -10,9 +11,9 @@ import com.example.orderservice.repository.OrderRepository;
 import com.example.orderservice.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +27,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RestTemplate restTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
 
     @Override
@@ -53,6 +55,17 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.PENDING);
 
         Order savedOrder = orderRepository.save(order);
+
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                savedOrder.getId(),
+                savedOrder.getProductId(),
+                savedOrder.getQuantity(),
+                savedOrder.getTotalPrice()
+        );
+
+        kafkaTemplate.send("order-created-topic", event.toString());
+        System.out.println("Published OrderCreatedEvent for Order ID: " + savedOrder.getId());
+
     }
 
     @Override

@@ -9,5 +9,5 @@ public record ProductResponse (
         String name,
         String description,
         Double price,
-        String stockQuantity){}
+        Integer stockQuantity){}
 

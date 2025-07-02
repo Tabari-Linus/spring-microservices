@@ -23,6 +23,8 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="api-gateway" target="21" />
+      <module name="micro-service" target="1.5" />
+      <module name="shared-model" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
