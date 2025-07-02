@@ -8,8 +8,11 @@ import com.example.orderservice.exception.ProductNotFoundException;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.repository.OrderRepository;
 import com.example.orderservice.service.OrderService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +29,7 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
+    @CircuitBreaker(name = "productServiceBreaker", fallbackMethod = "createOrderFallback")
     public void createOrder(Order order) {
         String productUrl = "http://product-service/api/v1/products/"+ order.getProductId();
         ProductDto productDto;
@@ -78,5 +82,15 @@ public class OrderServiceImpl implements OrderService {
         orderResponse.setTotalPrice(order.getTotalPrice());
         orderResponse.setStatus(order.getStatus());
         return orderResponse;
+    }
+
+    public ResponseEntity<String> createOrderFallback(Order order, Throwable t) {
+        System.err.println("Fallback activated for createOrder due to: " + t.getMessage());
+
+        if (t instanceof HttpClientErrorException.NotFound) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(null);
     }
 }
